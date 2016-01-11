@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Parkeren in Gent</string>
+
+    <!-- The title of the main activity is too close to the App icon, so I had to put a whitespace in the beginning of the string.
+         solution found on Stackoverflow ( http://stackoverflow.com/a/2206684/3877060 ) for usage in xml files like this manifest.xml
+         Use &#160; for Non-breakable whitespace
+         Use &#032; for regular space
+
+         The equivalent for a whitespace in pure HTML code, namely '&nbsp;' , does NOT work in an xml file !!!
+     -->
+
+    <string name="keuze">&#160;Maak een keuze</string>
+    <string name="locatie">Locatie</string>
+    <string name="info">Informatie</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_previous">Terug</string>
+    <string name="action_quit">Afsluiten</string>
+    <string name="title_activity_splash_screen">SplashScreen</string>
+    <string name="title_activity_info">Info</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="radiobutton_normal">Normaal</string>
+    <string name="radiobutton_satellite">Satelliet</string>
+
+    <string name="swipe_down_to_refresh">Veeg naar beneden om te verversen.</string>
+
+    <string name="map">Kaartweergave :</string>
+    <string name="car">Toon route met auto</string>
+
+    <!--
+        <string name="route">Route per :</string>
+        <string name="bycicle">Fiets</string>
+        <string name="walking">Te voet</string>
+    -->
+
+    <string name="info_adress">Adres :</string>
+    <string name="info_contact">Contact info :</string>
+    <string name="info_openingTimesInfo">Openingstijden :</string>
+
+</resources>

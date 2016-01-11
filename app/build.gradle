@@ -1,0 +1,30 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion '20.0.0'
+    defaultConfig {
+        applicationId 'be.programmeercursussen.parkinggent2'
+        minSdkVersion 11
+        targetSdkVersion 21
+        versionCode 2
+        versionName '1.0'
+    }
+    buildTypes {
+        release {
+            resValue "string", "google_maps_api_key", "*deleted*"
+            runProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    productFlavors {
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    // Google Play Services
+    compile 'com.google.android.gms:play-services:7.5.0'
+    // swipe to refresh
+    compile 'com.android.support:appcompat-v7:21.0.+'
+}

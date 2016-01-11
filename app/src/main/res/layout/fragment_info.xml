@@ -1,0 +1,67 @@
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:stretchColumns="0,1"
+    tools:context="be.programmeercursussen.parkinggent2.fragment.InfoFragment">
+
+    <TableRow
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp">
+        <TextView
+            android:layout_column="0"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:text="@string/info_adress">
+        </TextView>
+
+        <TextView
+            android:id="@+id/tv_info_adress"
+            android:layout_column="1"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:text="">
+        </TextView>
+    </TableRow>
+
+    <TableRow
+        android:layout_marginBottom="10dp">
+        <TextView
+            android:layout_column="0"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:text="@string/info_contact">
+        </TextView>
+
+        <TextView
+            android:id="@+id/tv_info_contact"
+            android:layout_column="1"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:text="">
+        </TextView>
+    </TableRow>
+
+    <TableRow
+        android:layout_marginBottom="10dp">
+        <TextView
+            android:layout_column="0"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:text="@string/info_openingTimesInfo">
+        </TextView>
+
+        <TextView
+            android:id="@+id/tv_info_openingsTimesInfo"
+            android:layout_column="1"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:text="">
+        </TextView>
+    </TableRow>
+
+
+</TableLayout>

@@ -1,0 +1,217 @@
+package be.programmeercursussen.parkinggent2.service;
+
+import android.app.IntentService;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.ResultReceiver;
+import android.text.TextUtils;
+import android.util.Log;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+
+import be.programmeercursussen.parkinggent2.exception.DownloadException;
+import be.programmeercursussen.parkinggent2.model.City;
+import be.programmeercursussen.parkinggent2.model.OpeningTimesInfo;
+import be.programmeercursussen.parkinggent2.model.Parking;
+import be.programmeercursussen.parkinggent2.model.Server;
+import be.programmeercursussen.parkinggent2.model.Status;
+
+/**
+ * Created by Davy on 6/12/2015.
+ */
+public class DownloadService extends IntentService {
+
+    /* constanten */
+    public static final int STATUS_RUNNING = 0;
+    public static final int STATUS_FINISHED = 1;
+    public static final int STATUS_ERROR = 2;
+
+    private static final String TAG = "DownloadService";
+
+    /* constructor */
+    public DownloadService(){
+        super(DownloadService.class.getName());
+    }
+
+    @Override
+    protected void onHandleIntent(Intent intent) {
+        Log.i(TAG, "Service started!");
+
+        final ResultReceiver receiver = intent.getParcelableExtra("receiver");
+        String url = intent.getStringExtra("url");
+
+        Bundle bundle = new Bundle();
+
+        if (!TextUtils.isEmpty(url)) {
+            /* Update UI: Download is Running */
+            receiver.send(STATUS_RUNNING, bundle.EMPTY);
+
+            try {
+                ArrayList<Parking> results = downloadData(url);
+
+                /* Sending result back to activity */
+                if (null != results && results.size() > 0) {
+                    bundle.putParcelableArrayList("result", results);
+                    receiver.send(STATUS_FINISHED, bundle);
+                }
+            } catch (Exception e) {
+                /* Sending error message back to activity */
+                bundle.putString(Intent.EXTRA_TEXT, e.toString());
+                receiver.send(STATUS_ERROR, bundle);
+            }
+        }
+        Log.i(TAG, "Service stopping!");
+        this.stopSelf();
+    }
+
+    private ArrayList<Parking> downloadData(String requestUrl) throws IOException, DownloadException {
+        InputStream inputStream = null;
+
+        HttpURLConnection urlConnection = null;
+
+        /* forming the java.net.URL object */
+        URL url = new URL(requestUrl);
+
+        /* casting HttpUrlConnection */
+        urlConnection = (HttpURLConnection) url.openConnection();
+
+        /* optional request header */
+        urlConnection.setRequestProperty("Content-Type", "application/json");
+
+        /* option request header */
+        urlConnection.setRequestProperty("Accept", "application/json");
+
+        /* for Get request */
+        urlConnection.setRequestMethod("GET");
+
+        int statusCode = urlConnection.getResponseCode();
+
+        /* 200 represents HTTP OK */
+        if (statusCode == 200) {
+            inputStream = new BufferedInputStream(urlConnection.getInputStream());
+
+            String response = convertInputStream(inputStream);
+
+
+            //String[] results = parseResult(response);
+
+            ArrayList<Parking> parkingData = parseResult(response);
+
+            return parkingData;
+        } else {
+            throw new DownloadException("Failed to fetch data!");
+        }
+    }
+
+    private String convertInputStream(InputStream inputStream) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        String line = "";
+        String result = "";
+
+        while ((line = bufferedReader.readLine()) != null) {
+            result += line;
+        }
+
+        /* Close stream */
+        if (null != inputStream) {
+            inputStream.close();
+        }
+
+        return result;
+    }
+
+    private ArrayList<Parking> parseResult(String result) {
+        Log.i(TAG, "result : " + result);
+        ArrayList<Parking> arrayList = null;
+
+        try {
+            JSONArray parkings = new JSONArray(result);
+            Log.i(TAG, "aantal parkings : " + parkings.length());
+
+            arrayList = new ArrayList<Parking>();        // results niet juist ==> 2 PLAATSEN IN SINT-NIKLAAS !!!
+
+            for (int i = 0; i < parkings.length(); i++) {
+
+                Parking p = new Parking();
+                JSONObject parking = parkings.getJSONObject(i);
+
+                String name = parking.getString("name");
+                Log.i(TAG, "naam parking : " + parking.getString("name"));
+
+                p.setId(Long.parseLong(parking.getString("id")));
+                p.setLastModifiedDate(parking.getString("lastModifiedDate"));
+                p.setName(parking.getString("name"));
+                p.setDescription(parking.getString("description"));
+                p.setLatitude(parking.getString("latitude"));
+                p.setLongitude(parking.getString("longitude"));
+                p.setAddress(parking.getString("address"));
+                p.setContactInfo(parking.getString("contactInfo"));
+                p.setBlurAvailability(parking.getString("blurAvailability"));
+
+                // JSONObject opvragen van City
+                JSONObject stad = parking.getJSONObject("city");
+
+                City c = new City();
+                c.setId(Long.parseLong(stad.getString("id")));
+                c.setName(stad.getString("name"));
+                // Log.i(TAG, "Naam stad : " + c.getName());
+                p.setCity(c);
+
+                // JSONObject opvragen van Server
+                JSONObject server = parking.getJSONObject("parkingServer");
+
+                Server s = new Server();
+                s.setId(Long.parseLong(server.getString("id")));
+                s.setName(server.getString("name"));
+                // Log.i(TAG, "Naam server : " + s.getName());
+                p.setServer(s);
+
+                p.setSuggestedFreeThreshold(Integer.parseInt(parking.getString("suggestedFreeThreshold")));
+                p.setSuggestedFullThreshold(Integer.parseInt(parking.getString("suggestedFullThreshold")));
+                p.setCapacityRounding(Integer.parseInt(parking.getString("capacityRounding")));
+
+                // JSONObject opvragen van OpeningTimesInfo
+                JSONObject openingTimesInfo = parking.getJSONObject("openingTimesInfo");
+
+                OpeningTimesInfo oti = new OpeningTimesInfo();
+                oti.setId(Long.parseLong(openingTimesInfo.getString("id")));
+                oti.setCode(openingTimesInfo.getString("code"));
+                oti.setText(openingTimesInfo.getString("text"));
+                p.setOpeningTimesInfo(oti);
+
+                // JSONObject opvragen van Status
+                JSONObject status = parking.getJSONObject("parkingStatus");
+
+                Status st = new Status();
+                if (status.has("availableCapacity")) {      // last object in json-file has no availableCapacity !
+                    st.setAvailableCapacity(Long.parseLong(status.getString("availableCapacity")));
+                }
+                st.setTotalCapacity(Long.parseLong(status.getString("totalCapacity")));
+                st.setOpen(Boolean.valueOf(status.getString("open")));
+                st.setSuggestedCapacity(status.getString("suggestedCapacity"));
+                st.setActiveRoute(status.getString("activeRoute"));
+                st.setLastModifiedDate(status.getString("lastModifiedDate"));
+                p.setStatus(st);
+
+                if (p.getCity().getName().equals("Gent")) {
+                    arrayList.add(p);
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return arrayList;
+    }
+}
